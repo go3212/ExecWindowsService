@@ -1,23 +1,36 @@
-var builder = WebApplication.CreateBuilder(args);
+using ExecWindowsService.Singletons;
 
-// Add services to the container.
+ProcessManager? processManager = null;
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+
+    var builder = WebApplication.CreateBuilder(args);
+    // Add services to the container.
+    builder.Services.AddControllers();
+
+    processManager = new ProcessManager();
+    builder.Services.AddSingleton<IProcessManager>(processManager);
+
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+    
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.MapControllers();
+
+    app.Run();
+}
+finally
+{
+    processManager?.Dispose();
 }
 
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
